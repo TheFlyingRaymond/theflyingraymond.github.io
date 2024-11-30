@@ -1,6 +1,6 @@
 # Site settings
-title: 阿山的春天
-SEOTitle: 阿山的春天
+title: 阿成的春天和我的太阳
+SEOTitle: 阿成的春天和我的太阳
 header-img: img/home-bg.jpg
 email: theflyingraymond@gmail.com
 description: ""
@@ -65,7 +65,7 @@ duoshuo_share: false                     # set to false if you want to use Comme
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "我该用什么样子去和你重逢"
+sidebar-about-description: "如何与你重逢"
 sidebar-avatar: /img/avatar-me.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
