@@ -12,11 +12,11 @@ baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
 
 # SNS settings
 RSS: false
-weibo_username:     raymond
-zhihu_username:     raymond
-github_username:    raymond
+# weibo_username:     raymond
+# zhihu_username:     raymond
+# github_username:    raymond
 #twitter_username:  huxpro
-facebook_username:  raymond
+# facebook_username:  raymond
 
 
 
@@ -29,11 +29,9 @@ exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 anchorjs: true                          # if you want to customize anchor. check out line:181 of `post.html`
 
 
-
 # Gems
 # from PR#40, to support local preview for Jekyll 3.0
 gems: [jekyll-paginate]
-
 
 
 # Markdown settings
@@ -56,7 +54,6 @@ duoshuo_share: false                     # set to false if you want to use Comme
 
 
 
-
 # Analytics settings
 # Baidu Analytics
 # ba_track_id: 4cc1f2d8f3067386cc5cdb626a202900
@@ -76,7 +73,6 @@ sidebar-avatar: /img/avatar-me.jpg      # use absolute URL, seeing it's used in 
 # Featured Tags
 featured-tags: true                     # whether or not using Feature-Tags
 featured-condition-size: 1              # A tag will be featured if the size of it is more than this condition value
-
 
 
 # Friends
