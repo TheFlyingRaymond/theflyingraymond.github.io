@@ -1,40 +1,48 @@
 # Site settings
-title: 阿山的春天
-SEOTitle: 阿山的春天
+title: Raymond Lee
+SEOTitle: 阿成春天和我的太阳 
 header-img: img/home-bg.jpg
-email: theflyingraymond@gmail.com
-description: ""
-keyword: ""
-url: "http://sonnsei.com"              # your host, for absolute URL
-baseurl: "/theflyingraymond.github.io"         # for example, '/blog' if your blog hosted on 'host/blog'
+email: theFlyingRaymond@gmail.com
+description: "What should I become when I reunite with you, to hold the weight of this longing."
+keyword: "博客, 个人网站, 阿成"
+url: "https://www.sonnsei.com" # your host, for absolute URL
+baseurl: "" # for example, '/blog' if your blog hosted on 'host/blog'
 
-
+# Publish posts or collection documents with a future date.
+future: true
 
 # SNS settings
 RSS: false
-weibo_username:     raymond
-zhihu_username:     raymond
-github_username:    raymond
-#twitter_username:  huxpro
-facebook_username:  raymond
-
-
+# weibo_username: Raymond Lee
+# zhihu_username: Raymond Lee
+# github_username: Raymond Lee
+# twitter_username: Raymond Lee
+#facebook_username:  Raymond Lee
+#linkedin_username:  Raymond Lee
 
 # Build settings
 # from 2016, 'pygments' is unsupported on GitHub Pages. Use 'rouge' for highlighting instead.
 highlighter: rouge
 permalink: pretty
 paginate: 10
-exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
-anchorjs: true                          # if you want to customize anchor. check out line:181 of `post.html`
-
-
+exclude:
+  [
+    "less",
+    "node_modules",
+    "Gruntfile.js",
+    "package.json",
+    "README.md",
+    "README.zh.md",
+  ]
+anchorjs: true # if you want to customize anchor. check out line:181 of `post.html`
+# If you have timezone issue (e.g. #68) in China, uncomment to use this:
+#timezone: CN
 
 # Gems
 # from PR#40, to support local preview for Jekyll 3.0
-gems: [jekyll-paginate]
-
-
+# make sure you have this gem installed
+# `$ gem install jekyll-paginate`
+plugins: [jekyll-paginate]
 
 # Markdown settings
 # replace redcarpet to kramdown,
@@ -42,59 +50,53 @@ gems: [jekyll-paginate]
 # document: http://jekyllrb.com/docs/configuration/#kramdown
 markdown: kramdown
 kramdown:
-  input: GFM                            # use Github Flavored Markdown !important
-
-
+  input: GFM # use Github Flavored Markdown !important
+  syntax_highlighter_opts:
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
 
 # Disqus settings
-#disqus_username: _your_disqus_short_name_
+disqus_username: hux
 
-# Duoshuo settings
-duoshuo_username: raymond
-# Share component is depend on Comment so we can NOT use share only.
-duoshuo_share: false                     # set to false if you want to use Comment without Sharing
-
-
-
+# Netease settings
+netease_comment: false
 
 # Analytics settings
 # Baidu Analytics
-# ba_track_id: 4cc1f2d8f3067386cc5cdb626a202900
+# ba_track_id: [your track id]
+
 # Google Analytics
-# ga_track_id: 'UA-49627206-1'            # Format: UA-xxxxxx-xx
-# ga_domain: huangxuan.me
-
-
+ga_track_id: "UA-49627206-1" # Format: UA-xxxxxx-xx
+ga_domain: huangxuan.me
 
 # Sidebar settings
-sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "我该用什么样子去和你重逢"
-sidebar-avatar: /img/avatar-me.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
-
-
+sidebar: true # whether or not using Sidebar.
+sidebar-about-description: "敢想不敢為者終困牢籠"
+sidebar-avatar: https://github.com/theflyingraymond.png # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
-featured-tags: true                     # whether or not using Feature-Tags
-featured-condition-size: 1              # A tag will be featured if the size of it is more than this condition value
+featured-tags: true # whether or not using Feature-Tags
+featured-condition-size: 1 # A tag will be featured if the size of it is more than this condition value
 
+# Progressive Web Apps
+chrome-tab-theme-color: "#000000"
+service-worker: true
 
+# MathJax rendering for layout:page (e.g. post preview)
+page-mathjax: false
 
 # Friends
-friends: [
-    # {
-    #     title: "Hux Blog",
-    #     href: "http://huangxuan.me"
-    # },{
-    #     title: "Foo",
-    #     href: "#"
-    # },{
-    #     title: "Bar",
-    #     href: "#"
-    # },{
-    #     title: "Example Friends",
-    #     href: "#"
-    # },{
-    #     title: "It helps SEO",
-    #     href: "#"
-    # }
-]
+friends:
+  [
+    # { title: "乱序（Midare）", href: "http://mida.re/" },
+    # { title: "Ebn Zhang", href: "https://ebnbin.dev/" },
+    # { title: "Kun Qian", href: "http://kunq.me" },
+    # { title: "Sherry Woo", href: "https://sherrywoo.me/" },
+    # { title: "SmdCn", href: "http://blog.smdcn.net" },
+    # { title: "JiyinYiyong", href: "http://tiye.me/" },
+    # { title: "DHong Say", href: "http://dhong.co" },
+    # { title: "尹峰以为", href: "http://ingf.github.io/" },
+  ]
