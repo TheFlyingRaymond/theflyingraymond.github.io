@@ -9,7 +9,7 @@ tag:
   - ORM
 ---
 
-# 【主线】实现MyBatis：Chapter1: 代理框架搭建
+# 【主线】实现MyBatis：Chapter1: 搭建代理框架，体验造假的快乐
 搭建整体代理执行框架
 
 <!-- more -->
