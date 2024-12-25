@@ -10,22 +10,22 @@ tag:
 
 ---
 
-# 【主线】实现MyBatis：Chapter2: 解析Environment,从DB读数据
+# 【主线】实现MyBatis：Chapter2: 从DB读取真实的假数据
 自定义数据源工厂，根据配置创建数据源对象，与数据库真实交互获取数据
 
 <!-- more -->
-## 一、内容概述
-本章涉及到的主要的类及其关系如下图所示
-![关系图](数据源解析.png)
 
-首先，在第一章中我们已经在 MapperProxy中对方法进行代理，并且返回了 mock 数据，为了让MapperProxy职责更为单一，我们将代理方法的真正执行逻辑抽取到别的地方，引入的 Executor执行器。
-其次，Environment的核心是 DataSource，我们通过 DataSourceFactory来支持数据源的创建与切换。
-最后，将各部件组装到执行器的这一步骤，我们在 SqlSessionFactory创建 Session这一步执行
-
-## 二、核心代码
+::: tip 本章目的
+● 读取数据库配置，“真实”地从数据中取出一条“假数据”
+:::
+## 一、过程分析
+在上一章中，我们已将在代理类中成功拦截了方法执行，并返回了一条假的数据，而我们本章要做的，其实就是将这个执行过程替换为从 db 读一条固定数据返回，并且读取 db 所需要的信息我们需要从配置文件中读入。看起来，我们需要这么几个环节：
+1. 配置信息的解析及记录。XML 文件结构的解析不是我们的重点，我们可以借助已有的工具类容易地拿到节点属性、值，我们解析后的结果可以放到某个结构中，然后以全局配置的形式存在
+2. 在有了相关信息后，读取 db 数据理论上可以直接操作 jdbc，但我们这里还是选择使用一个线程的连接池
+此外，我们之前是在代理类中进行假数据的创建，但从单一职责的角度看，代理类只负责代理方法，真正后续与 DB 的交互操作我们引入 `Executor` 来负责，而 `SqlSession` 作为桥梁在二者间进行连接
+## 二、核心设计
 ### 2.1 数据源
-对于数据源工厂接口，只有两个方法，一是配置属性值，二是获取数据源对象。
-对于数据源，我们直接采用的是 HikariDataSource，我们的目的不在数据源，所以不在此多做纠结。此外对于属性值，我们也只从配置中读取几个常用字段，其余的则是以硬编码方式完成。
+和数据源相关的主要有数据源工厂和具体的实现类，工厂方法本身在良好架构方面的意义不再赘述，而具体的实现类，我们定义了 `SimpleHikariDataSourceFactory`来固定返回 `HikariDataSource`，我们的目的不在数据源，所以不在此多做纠结。此外对于属性值，我们也只从配置中读取几个常用字段，其余的则是以硬编码方式完成。
 ```java
 public interface DataSourceFactory {
     void setProperties(Properties props);
@@ -60,8 +60,8 @@ public class SimpleHikariDataSourceFactory implements DataSourceFactory {
     }
 }
 ```
-### 2.2 执行器
-执行器部分，目前我们只定义一个 execute 接口，在MockExecutor 实现中，我们使用获取到的真实连接从 DB 中读取一条数据返回
+### 2.2  执行器
+执行器部分，目前我们只定义一个 `Executor` 接口，在`MockExecutor` 实现中，我们使用获取到的真实连接从 DB 中读取一条数据返回
 ```java
 public interface Executor {
     Object execute();
@@ -94,11 +94,9 @@ public class MockExecutor implements Executor {
         return null;
     }
 ```
-
-### 2.3 配置解析
-在这一部分中，我们引入正式的 DefaultSqlSessionFactory进行 Session 的构建，而它接受的 Configuration类型的入参则是由 XMLConfigBuilder对 XML 文件解析后传入，此过程中涉及到的对 XML 格式本身的解析我们则直接求助于现成的工具类~ 而在 SqlSession部分，我们也抛弃了之前的 MockSqlSession 对象，创建了正式的 DefaultSqlSession但是它目前也没有什么真正的逻辑，直接接力了一下代理调用过来的 execute 方法。这两部分逻辑简单，不再赘述
-
-接下来是 XMLConfigBuilder，它需要接受一个 XPathParser对象，该对象可以帮助我们解析配置文件的节点信息，我们只需要知道它的获取方式就行，不必深究，我们的关注点在 parse方法。在 parseEnvironments方法中，我们通过获取到的节点信息，以反射方式拿到数据源工厂实例，传递对应的配置信息后，将工厂创建的数据源对象存储在全局配置中，这样执行器在执行时即可获取到可用的连接对象。
+### 2.3  配置解析
+在这一部分中，我们引入正式的 `DefaultSqlSessionFactory`进行 `Session` 的构建，而它接受的 `Configuration`类型的入参则是由 `XMLConfigBuilder`对 XML 文件解析后传入，此过程中涉及到的对 XML 格式本身的解析我们则直接求助于现成的工具类~ 而在 `SqlSession`部分，我们也抛弃了之前的 `MockSqlSession` 对象，创建了正式的 `DefaultSqlSession`但是它目前也没有什么真正的逻辑，直接接力了一下代理调用过来的 `execute` 方法。这两部分逻辑简单，不再赘述
+接下来是 `XMLConfigBuilder`，它需要接受一个 `XPathParser`对象，该对象可以帮助我们解析配置文件的节点信息，我们只需要知道它的获取方式就行，不必深究，我们的关注点在 `parse`方法。在 `parseEnvironments`方法中，我们通过获取到的节点信息，以反射方式拿到数据源工厂实例，传递对应的配置信息后，将工厂创建的数据源对象存储在全局配置中，这样执行器在执行时即可获取到可用的连接对象。
 ```java
 @Slf4j
 public class XMLConfigBuilder {
@@ -161,38 +159,42 @@ public class XMLConfigBuilder {
         throw new RuntimeException("获取数据源工厂失败");
     }
 ```
+## 三、整体架构
+![关系图](数据源解析.png)
 
-至此，本章的核心代码完成，我们现在的目录结构如下：
+我们现在的目录结构如下：
 ```shell
 .
 └── mybatis
     ├── Executor
-    │   ├── Executor.java
-    │   └── MockExecutor.java
+    │   ├── Executor.java
+    │   └── MockExecutor.java
     ├── binding
-    │   └── MapperRegistry.java
+    │   └── MapperRegistry.java
     ├── builder
-    │   └── XMLConfigBuilder.java
+    │   ├── BaseBuilder.java
+    │   └── XMLConfigBuilder.java
     ├── datasource
-    │   ├── DataSourceFactory.java
-    │   └── SimpleHikariDataSourceFactory.java
+    │   ├── DataSourceFactory.java
+    │   └── SimpleHikariDataSourceFactory.java
     ├── mapping
-    │   └── Environment.java
+    │   └── Environment.java
     ├── proxy
-    │   ├── MapperProxy.java
-    │   └── MapperProxyFactory.java
+    │   ├── MapperProxy.java
+    │   └── MapperProxyFactory.java
     ├── session
-    │   ├── Configuration.java
-    │   ├── DefaultSqlSession.java
-    │   ├── DefaultSqlSessionFactory.java
-    │   ├── SqlSession.java
-    │   └── SqlSessionFactory.java
+    │   ├── Configuration.java
+    │   ├── DefaultSqlSession.java
+    │   ├── DefaultSqlSessionFactory.java
+    │   ├── SqlSession.java
+    │   └── SqlSessionFactory.java
     └── testdata
         ├── CountryMapper.java
         └── dao
             └── Country.java
+
 ```
-## 三、测试验证
+## 四、测试验证
 首相我们要在配置文件中配置相关信息，尤其是 datasource 的 type，它应该指向我们的数据源工厂
 ```xml
  <environments default="development">
