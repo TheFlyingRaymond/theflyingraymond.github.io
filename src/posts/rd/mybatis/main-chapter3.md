@@ -21,18 +21,18 @@ tag:
 
 ## 一、过程分析
 首先我们来分析一下，`select * from country where id = #{id}` 这个语句最终得到执行的流程是
-1. 我们通过某种方式获取到 select * from country where id = ?的 Prepared SQL 语句
-2. 我们通过某种方式得知 Country selectById(@Param("id") Long id在调用时的入参 id 为 110
-3. 我们通过 preparedStatement.setLong(1, 110)的方式执行 JDBC 的调用
-4. 我们通过某种方式将得到的 ResultSet转化为我们想要的 Country 对象
+1. 我们通过某种方式获取到 `select * from country where id = ?`的 Prepared SQL 语句
+2. 我们通过某种方式得知 `Country selectById(@Param("id") Long id)`在调用时的入参 id 为 110
+3. 我们通过 `preparedStatement.setLong(1, 110)`的方式执行 JDBC 的调用
+4. 我们通过某种方式将得到的 `ResultSet`转化为我们想要的 `Country` 对象
 
-对于第一步，我们通过 xml 的解析，可以直接拿到 select * from country where id = #{id}，对字符串进行处理后，我们除了可以得到想要的 Prepared SQL 之外，还可以得到一个占位符列表，将占位符索引与其名称映射起来，这个信息我们之后也会用到。
+**对于第一步**，我们通过 xml 的解析，可以直接拿到 `select * from country where id = #{id}`，对字符串进行处理后，我们除了可以得到想要的 Prepared SQL 之外，还可以得到一个占位符列表，将占位符索引与其名称映射起来，这个信息我们之后也会用到。
 
-对于第二步，我们通过 Method 对象可以获得每个位置的参数的名称，而 Method 对象在代理执行的时候可以明确获得。此外，相同的 Method 的关于参数位置的信息都是相同的，我们可以将这个信息缓存起来。
+**对于第二步**，我们通过 `Method` 对象可以获得每个位置的参数的名称，而 `Method` 对象在代理执行的时候可以明确获得。此外，相同的 `Method` 的关于参数位置的信息都是相同的，我们可以将这个信息缓存起来。
 
-对于第三步，我们通过前面获取到的参数、占位符相关的信息，其实在运行时是可以获得每个占位符索引对应的实参对象的。
+**对于第三步**，我们通过前面获取到的参数、占位符相关的信息，其实在运行时是可以获得每个占位符索引对应的实参对象的。
 
-对于第四步，我们暂时忽略实际的结果映射，我们本章只支持单个 Country 对象的查询。
+**对于第四步**，我们暂时忽略实际的结果映射，我们本章只支持单个 `Country` 对象的查询。
 
 ## 二、核心设计
 ### 2.1 SQL 语句信息存储结构
@@ -94,6 +94,72 @@ public class ParamNameResolver {
 1. 配置解析阶段，将 mapper 文件中的执行节点解析为两种数据：PreparedSQL 以及一份占位符 idx 与 name 的映射，信息存放在 MappedStatement中
 2. 运行阶段，根据执行方法构建一个 MappedMethod 对象，几个依赖类在此完成参数绑定的核心逻辑，该逻辑放在 ParamNameResolver实例中
 3. Proxy 对方法调用通过层层交接来到 Executor，Executor 根据已知信息拼出最终的可执行 SQL，固定从数据库获取单个 Country 对象并返回。
+
+现在，我们的项目结构如下：
+```shell
+.
+├── pom.xml
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── com
+    │   │       └── raymond
+    │   │           └── mybatis
+    │   │               ├── Executor
+    │   │               │   ├── Executor.java
+    │   │               │   └── SimpleExecutor.java
+    │   │               ├── annotation
+    │   │               │   └── Param.java
+    │   │               ├── binding
+    │   │               │   ├── MapperMethod.java
+    │   │               │   └── MapperRegistry.java
+    │   │               ├── builder
+    │   │               │   ├── BaseBuilder.java
+    │   │               │   ├── MapperBuilderAssistant.java
+    │   │               │   ├── XMLConfigBuilder.java
+    │   │               │   ├── XMLMapperBuilder.java
+    │   │               │   └── XMLStatementBuilder.java
+    │   │               ├── datasource
+    │   │               │   ├── DataSourceFactory.java
+    │   │               │   └── SimpleHikariDataSourceFactory.java
+    │   │               ├── mapping
+    │   │               │   ├── Environment.java
+    │   │               │   ├── MappedStatement.java
+    │   │               │   └── SqlCommandType.java
+    │   │               ├── proxy
+    │   │               │   ├── MapperProxy.java
+    │   │               │   └── MapperProxyFactory.java
+    │   │               ├── reflection
+    │   │               │   └── ParamNameResolver.java
+    │   │               ├── script
+    │   │               │   └── SimpleSqlSource.java
+    │   │               ├── session
+    │   │               │   ├── Configuration.java
+    │   │               │   ├── DefaultSqlSession.java
+    │   │               │   ├── DefaultSqlSessionFactory.java
+    │   │               │   ├── SqlSession.java
+    │   │               │   └── SqlSessionFactory.java
+    │   │               └── testdata
+    │   │                   ├── CountryMapper.java
+    │   │                   └── dao
+    │   │                       └── Country.java
+    │   └── resources
+    │       ├── log4j2.xml
+    │       └── mapper
+    │           └── CountryMapper.xml
+    └── test
+        ├── java
+        │   └── com
+        │       └── raymond
+        │           └── mybatis
+        │               ├── MainTest.java
+        │               ├── builder
+        │               │   └── XMLMapperBuilderTest.java
+        │               └── proxy
+        └── resources
+            └── batis-config.xml
+
+```
 ## 四、测试验证
 我们的数据库中 Country 表中目前有数据如下
 ```sql

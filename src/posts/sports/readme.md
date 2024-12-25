@@ -1,5 +1,5 @@
 ---
-title: 一个运动爱好者
+title: 三百六十五里路
 index: false
 icon: laptop-code
 article: false

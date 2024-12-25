@@ -26,7 +26,7 @@ export default hopeTheme({
   sidebar,
 
   // 页脚
-  footer: "默认页脚",
+  footer: "花有重开日，人无再少年",
   displayFooter: true,
 
   // 博客相关
