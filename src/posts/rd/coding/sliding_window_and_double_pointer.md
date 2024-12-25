@@ -110,8 +110,12 @@ func findMaxAverage(nums []int, k int) float64 {
 |No.|场景|例题|备注|
 |----|----|----|----|
 |1|特殊元素数目|[1456. 定长子串中元音的最大数目](https://leetcode.cn/problems/maximum-number-of-vowels-in-a-substring-of-given-length/description/)||
-|2|元素均值-->元素和|[643. 子数组最大平均数 I](https://leetcode.cn/problems/maximum-average-subarray-i/description/)||
-|3|半径-->均值-->元素和|[2090. 半径为 k 的子数组平均值](https://leetcode.cn/problems/k-radius-subarray-averages/description/)|这个题还挺有意思的|
+|||[2379. 得到 K 个黑块的最少涂色次数](https://leetcode.cn/problems/minimum-recolors-to-get-k-consecutive-black-blocks/description/)||
+|2|元素和:元素均值|[643. 子数组最大平均数 I](https://leetcode.cn/problems/maximum-average-subarray-i/description/)||
+|3|元素和:均值:半径|[2090. 半径为 k 的子数组平均值](https://leetcode.cn/problems/k-radius-subarray-averages/description/)|❤️|
+|4|元素和:特殊元素|[1052. 爱生气的书店老板](https://leetcode.cn/problems/grumpy-bookstore-owner/submissions/)|❤️|
+|5|字符串去重|[1461. 检查一个字符串是否包含所有长度为 K 的二进制子串](https://leetcode.cn/problems/check-if-a-string-contains-all-binary-codes-of-size-k/)||
+|||||
 
 
 ## 双指针问题
