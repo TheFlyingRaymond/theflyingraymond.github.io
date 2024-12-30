@@ -9,4 +9,6 @@ category:
 
 [操作系统](./os/readme.md)
 [数据结构与算法](./coding/readme.md)
+[设计模式](./design-pattern/readme.md)
+[Java](./java/readme.md)
 [MyBatis](./mybatis/readme.md)
