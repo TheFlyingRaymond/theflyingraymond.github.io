@@ -2,12 +2,9 @@
 icon: pen-to-square
 date: 2024-12-30
 category:
-  - 计算机
-tag:
   - MyBatis
-  - Database
-  - ORM
-
+tag:
+  - 主线
 ---
 
 # 【主线】实现MyBatis：Chapter4: 完善参数绑定，引入结果映射

@@ -2,11 +2,9 @@
 icon: pen-to-square
 date: 2024-12-22
 category:
-  - 计算机
-tag:
   - MyBatis
-  - Database
-  - ORM
+tag:
+  - 主线
 ---
 
 # 【主线】实现MyBatis：Chapter1: 搭建代理框架，体验造假的快乐

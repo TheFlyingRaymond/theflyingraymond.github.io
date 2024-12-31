@@ -2,12 +2,9 @@
 icon: pen-to-square
 date: 2024-12-24
 category:
-  - 计算机
-tag:
   - MyBatis
-  - Database
-  - ORM
-
+tag:
+  - 主线
 ---
 
 # 【主线】实现MyBatis：Chapter3: 解析SQL，浅尝参数匹配

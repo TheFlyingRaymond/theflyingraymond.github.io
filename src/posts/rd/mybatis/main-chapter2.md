@@ -2,12 +2,9 @@
 icon: pen-to-square
 date: 2024-12-22
 category:
-  - 计算机
-tag:
   - MyBatis
-  - Database
-  - ORM
-
+tag:
+  - 主线
 ---
 
 # 【主线】实现MyBatis：Chapter2: 从DB读取真实的假数据

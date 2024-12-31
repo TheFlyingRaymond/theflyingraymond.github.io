@@ -2,11 +2,9 @@
 icon: pen-to-square
 date: 2024-12-21
 category:
-  - 计算机
-tag:
   - MyBatis
-  - Database
-  - ORM
+tag:
+  - 主线
 ---
 
 # 【主线】实现MyBatis：Chapter0: 介绍

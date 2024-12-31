@@ -2,12 +2,9 @@
 icon: pen-to-square
 date: 2024-12-30
 category:
-  - 计算机
-tag:
   - MyBatis
-  - Database
-  - ORM
-
+tag:
+  - 支线
 ---
 
 # MyBatis使用3：动态SQL
