@@ -6,8 +6,8 @@ export default defineUserConfig({
   base: "/",
 
   lang: "zh-CN",
-  title: "阿成的春天和我的太阳",
-  description: "阿成的春天和我的太阳",
+  title: "孤独星球漫游",
+  description: "孤独星球漫游",
 
   theme,
 

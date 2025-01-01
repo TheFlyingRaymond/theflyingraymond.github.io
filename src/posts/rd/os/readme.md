@@ -7,3 +7,4 @@ category:
   - 计算机
 ---
 
+<Catalog />
