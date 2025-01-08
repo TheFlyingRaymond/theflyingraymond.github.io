@@ -107,10 +107,216 @@ dw 0xAA55;
 | CS\DS\ES\SS       | 段寄存器。16位时代的寻址时段基址偏移+指令地址，段寄存器内存放的就是段基址            |
 | FLAGS             | 控制寄存器，里面有复杂的控制位                                             |
 
-二、Loader 加载
 
-三、进入保护模式
+## 二、Loader 加载
+简言之，MBR 只有 512 字节，放不下操作系统，所以 MBR 一般只当做跳板，我们真正的系统加载逻辑就称为 Loader，MBR 需要将执行权交给 Loader，这其中涉及到磁盘的读取。而读磁盘的操作，包括以一种固定的稍显繁琐的方式将需要读取的数据信息传递给磁盘的寄存器，之后触发读取命令，再之后即时轮询磁盘状态位，当数据准备就绪后即可读入指定地址
+```asm
+; 主引导程序
+;-----------------------------------------------
 
-四、开启分页
+;定义两个常量
+LOADER_BASE_ADDR equ 0x900
+LOADER_START_SECTOR equ 0x2
 
-五、执行 C 代码
+SECTION MBR vstart=0x7c00
+
+
+mov eax, LOADER_START_SECTOR
+mov bx, LOADER_BASE_ADDR
+mov cx, 2
+call rd_disk_m_16
+
+jmp LOADER_BASE_ADDR
+
+;-----------------------------------------------------------
+; 读取磁盘的n个扇区，用于加载loader
+; eax保存从硬盘读取到的数据的保存地址，ebx为起始扇区，cx为读取的扇区数
+rd_disk_m_16:
+;-----------------------------------------------------------
+
+    mov esi, eax
+    mov di, cx
+
+    ;读一个扇区 
+    mov dx, 0x1f2
+    mov al, cl
+    out dx, al
+
+    mov eax, LOADER_START_SECTOR
+
+    ;以LBA方式读取硬盘，分别设置LBA的低中高三部分，对应的端口号分别是0x1f3-0x1f5
+
+    mov dx, 0x1f3
+    out dx, al
+
+    shr eax, 8
+    mov dx, 0x1f4
+    out dx, al
+
+    shr eax, 8
+    mov dx, 0x1f5
+    out dx, al
+
+    shr eax, 8
+    and al, 0x0f; 只保留4位
+    or al, 0xe0; 设置驱动器号
+    mov dx, 0x1f6
+    out dx, al
+
+
+    mov dx, 0x1f7
+    mov al, 0x20
+    out dx, al
+
+.not_ready:
+    nop;                这是一个空操作指令，通常用于在循环中引入延迟或占位。
+    in al, dx;          从端口dx读取一个字节到al。这里dx应该已经被设置为硬盘状态寄存器的端口号（通常是0x1F7）
+    and al, 0x88;       对al进行按位与操作，保留al的第4位和第7位。这些位在IDE状态寄存器中通常代表设备忙（BSY）和数据请求（DRQ）状态。
+    cmp al, 0x08;       将al与0x08比较，即检查DRQ位是否设置且BSY位未设置
+    jnz .not_ready;     如果比较结果不为零（即DRQ未准备好或设备忙），则跳回到.not_ready，继续等待。
+
+    mov ax, di;         将di寄存器的值（通常是扇区数）复制到ax寄存器。
+    mov dx, 256;        将常数256加载到dx寄存器中
+    mul dx;             每个扇区512字节，每次读一个字的数据=2字节，需要读取的次数就是512*扇区数/2, 也就是现在的256*扇区数。这个计算结果存储在dx:ax，ax存低位，dx存高位
+    mov cx, ax;         将ax中的低16位结果复制到cx寄存器中，用于后续的循环传输数据
+    mov dx, 0x1f0;      0x1F0加载到dx寄存器中，准备从此端口读取数据
+
+.go_on_read:
+    in ax, dx;          从dx指向的端口读16位到ax
+    mov [bx], ax;       将ax数据复制到bx指向的地址，在我们的程序中这个值为LOADER_BASE_ADDR=0x900
+    add bx, 2;          bx指针移动
+    loop .go_on_read;   LOOP指令将CX寄存器的值减1，并检查结果。如果CX不为零，则跳转到标签.go_on_read，继续循环
+    ret
+
+times 510-($-$$) db 0
+dw 0xAA55;
+```
+## 三、进入保护模式
+```asm
+loader_start: 
+    ; 打开A20地址线
+    in al, 0x92
+    or al, 00000010B
+    out 0x92, al
+
+    ; 加载gdt
+    lgdt [gdt_ptr]
+
+    ; cr0第0位置1
+    mov eax, cr0
+    or eax, 0x00000001
+    mov cr0, eax
+
+    ; 刷新流水线
+    jmp dword SELECTOR_CODE:p_mode_start
+```
+进入保护模式的流程相对固定，其核心代码如上，可见其主要包含四个环节，各环节简述如下：
+- 开 A20 总线：实模式中地址线有 20 位，上古时代有些大哥会写地址回环的逻辑（地址对 20 位取模），冒然把地址线增加到 32 位会让有些历史逻辑报错，为了兼容就加了个开关，需要打开后才开启 32 位地址线
+- 加载 GDT：在分页之前，分段地址管理就是最先进的手段，保护模式当年就是以一手分段管理问世，GDT 表就是分段内存管理的配套信息，必须有它，之后会细说
+- 修改 CR0 标志位：就是修改标记位
+- 刷新流水线：流水线是 CPU 的一种机制，相当于多指令同时执行，指令是分 16 位译码和 32 位译码的，我们现在需要切换模式了，要确保之前的 16 位指令不会再产生影响，所以需要刷新流水线，而“长跳”是可触发流水线刷新的一种方式。
+
+### 3.1 构建并加载 GDT 表
+实模式下的寻址是段寄存器左移 4 位之后与指令地址相加后获取实际物理地址，看似分段但其实没有段信息的维护，无法进行有效管理，于是在保护模式下有了 GDT 表。所谓的 GDT 表，可以理解为一个段描述信息数组，每个段信息固定 64 位，之前段寄存器中的数据会被解析成数组索引，于是在保护模式下，寻址会先通过段寄存器信息获取到段描述符，从描述符中获取段基址，段基址结合指令地址获取到真实地址。
+![gdt](gdt.png)
+短描述符结构如上，由于历史原因，其结构很混乱，段基址、段界限都需要自己拼（CPU 会有对应的缓存机制）。我们之后会开启分页，这里的分段模式只是一个必经的过渡阶段，我们的构建 GDT 表，就是确定几个描述符，也就是指定几个 64 位数据块。
+根据约定，GDT 第一个描述符为空以避免歧义，此外我们需要一个数据段、一个代码段，以及我们需要一个显卡段来映射显卡内存。其实我们使用的是平坦模型，也就是实际只使用一个段来映射全部 4G 内存，所以这里定义的段大多是形式上的需要。描述符中各个位置的功能含义如下：
+
+| 位数范围     | 名称                               | 描述                                                                 |
+|--------------|----------------------------------|----------------------------------------------------------------------|
+| 63-56        | Base Address 31:24               | 段基址的高 8 位                                                      |
+| 55           | G (Granularity)                  | 粒度位，0：字节为单位，1：4KB 为单位                                 |
+| 54           | D/B (Default/Big)                | 默认操作数大小，0：16 位，1：32 位                                   |
+| 53           | L (64-bit code segment)          | 64 位代码段标志，仅在 64 位模式下有效                                |
+| 52           | AVL                              | 系统软件可用位，通常未使用                                           |
+| 51-48        | Limit 19:16                      | 段界限的高 4 位                                                      |
+| 47           | P (Present)                      | 段存在位，0：未存在，1：存在                                         |
+| 46-45        | DPL (Descriptor Privilege Level) | 描述符特权级，0：最高，3：最低                                       |
+| 44           | S (Descriptor type)              | 描述符类型，0：系统段，1：代码或数据段                               |
+| 43-40        | Type                             | 段类型，对于代码段和数据段有不同的含义                               |
+| 39-32        | Base Address 23:16               | 段基址的中 8 位                                                      |
+| 31-16        | Base Address 15:0                | 段基址的低 16 位                                                     |
+| 15-0         | Segment Limit 15:0               | 段界限的低 16 位                                                     |
+
+短描述符中，段界限有 20 位，配合 G 标识位将粒度定义为 4KB，刚好可以表示 32 位内存空间，也就是一个段就可以映射到整个 4G 内存，这就是平坦模型的来源
+
+#### 3.1.1 定义描述符
+```asm
+; 这里其实就是GDT的起始地址，第一个描述符为空
+GDT_BASE: dd 0x00000000
+          dd 0x00000000
+```
+如上代码所示，定义描述符真就是字面意思的定义一个 64 位数据块，其余的描述符过程虽然繁琐，但套路是一样的。首先我们需要定义一些常量来帮助我们做二进制的计算
+```asm
+; gdt描述符属性
+; 段描述符高23位，表示段界限的粒度为4KB
+DESC_G_4K equ 100000000000000000000000b   
+; D/B为，1表示运行在32位模式下
+DESC_D_32 equ 10000000000000000000000b
+; 高21位，如果为1表示为64位代码段，目前我们都是在32位模式下操作，故为零
+DESC_L equ     0000000000000000000000b
+; 没有明确的用途，取值随意
+DESC_AVL equ   000000000000000000000b
+; 第二部分段界限值，由于采用了32位平坦模型，所以段界限为(4GB / 4KB) - 1 = 0xFFFFF，故为全1
+DESC_LIMIT_CODE2 equ 11110000000000000000b
+DESC_LIMIT_DATA2 equ DESC_LIMIT_CODE2
+
+DESC_LIMIT_VIDEO2 equ 0000000000000001011b
+DESC_P equ 1000000000000000b
+DESC_DPL_0 equ 000000000000000b
+DESC_DPL_1 equ 010000000000000b
+DESC_DPL_2 equ 100000000000000b
+DESC_DPL_3 equ 110000000000000b
+DESC_S_CODE equ  1000000000000b
+DESC_S_DATA equ  DESC_S_CODE
+DESC_S_sys equ  0000000000000b
+DESC_TYPE_CODE equ 100000000000b
+DESC_TYPE_DATA equ 001000000000b
+
+; 代码段描述符的高32位表示，其中(0x00 << 24表示最高8位的段基址值，由于我们采用的是平坦模型，故基址为零)，后面唯一可变的就是段界限值
+DESC_CODE_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + \
+    DESC_L + DESC_AVL + DESC_LIMIT_CODE2 + \
+    DESC_P + DESC_DPL_0 + DESC_S_CODE + DESC_TYPE_CODE + 0x00
+
+DESC_DATA_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + \
+    DESC_L + DESC_AVL + DESC_LIMIT_DATA2 + \
+    DESC_P + DESC_DPL_0 + DESC_S_DATA + DESC_TYPE_DATA + 0x00
+
+DESC_VIDEO_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + \
+    DESC_L + DESC_AVL + DESC_LIMIT_VIDEO2 + \
+    DESC_P + DESC_DPL_0 + DESC_S_DATA + DESC_TYPE_DATA + 0x00
+```
+定义的部分就相对简单
+```asm
+; 这里其实就是GDT的起始地址，第一个描述符为空
+GDT_BASE: dd 0x00000000
+          dd 0x00000000
+
+; 代码段描述符，一个dd为4字节，段描述符为8字节，上面为低4字节
+CODE_DESC: dd 0x0000FFFF
+           dd DESC_CODE_HIGH4
+
+; 栈段描述符，和数据段共用
+DATA_STACK_DESC: dd 0x0000FFFF
+                 dd DESC_DATA_HIGH4
+
+; 显卡段，非平坦
+VIDEO_DESC: dd 0x80000007
+            dd DESC_VIDEO_HIGH4
+```
+#### 3.1.2 加载 GDT 表
+加载 GDT 表需要使用 lgdt命令，它需要GDT_BASE 和 GDT_LIMIT 信息：
+- GDT_BASE 是 GDT 在内存中的起始地址。
+- GDT_LIMIT 是 GDT 的大小减去 1，表示 GDT 的限制。
+```asm
+GDT_SIZE equ $ - GDT_BASE
+GDT_LIMIT equ GDT_SIZE - 1
+
+gdt_ptr dw GDT_LIMIT
+        dd GDT_BASE
+```
+
+
+## 四、开启分页
+
+## 五、执行 C 代码
