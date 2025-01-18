@@ -13,20 +13,20 @@ tag:
 
 <!-- more -->
 ::: tip 本章目标
-● 支持 List<Country> selectByName(@Param("name") String name)批量查询
-● 支持更新、删除语句 
-  ○ int updateNameById(@Param("id") Long id, @Param("name") String name)
-  ○ int deleteById(@Param("id") Long id);
-● 支持 update 和 delete 操作
-● 支持插入语句 int insertCountry(Country country);，提供主键回填
+- 支持 `List<Country> selectByName(@Param("name") String name)`批量查询
+- 支持更新、删除语句 
+  - `int updateNameById(@Param("id") Long id, @Param("name") String name)`
+  - `int deleteById(@Param("id") Long id);`
+- 支持 update 和 delete 操作
+- 支持插入语句 int insertCountry(Country country);，提供主键回填
 :::
 
 ## 一、过程分析
 对于批量查询，jdbc 给我们返回的是结果集，此处增加一个 for 循环的逻辑并配合一些 api 的改动接口；对于删除和更新语句，本质和查询语句没有区别，并且更新行数 jdbc 也会给到我们；
 对于插入语句，起码有以下几点
-● 需要得到对象字段到数据库字段的映射
-● 需要获取到插入数据后得到的主键 
-● 需要持有入参对象，并将主键 id 回填
+- 需要得到对象字段到数据库字段的映射
+- 需要获取到插入数据后得到的主键 
+- 需要持有入参对象，并将主键 id 回填
 在我们之前的逻辑中，直接使用了 Map 来存储实参映射，如果入参是 DO 对象的话，通过反射也是可以实现类似的功能，此处需要一层抽象来屏蔽 Map 和 DO 对象根据形参获取实参的逻辑差异；插入数据后生成的主键，我们可以从 resultset 中获取到，并且因为我们持有了实参对象，也可将主键回填到对象中，此处我们可以默认主键固定为 id 字段
 
 ## 二、核心设计
