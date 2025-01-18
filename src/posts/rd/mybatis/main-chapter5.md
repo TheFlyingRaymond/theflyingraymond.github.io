@@ -135,7 +135,7 @@ public class ParamNameResolver {
 ## 三、整体架构
 ![cp5](cp5.png)
 
-现在，我们的项目结构也来到这个样子：
+现在，我们的项目结构也来到这个样子
 ::: details 项目结构
 ```shell
 ├── Executor
