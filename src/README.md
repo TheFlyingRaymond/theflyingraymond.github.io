@@ -4,7 +4,7 @@ layout: BlogHome
 icon: home
 title: 博客主页
 heroImage: https://theme-hope-assets.vuejs.press/logo.svg
-heroText: 孤独星球漫游
+heroText: 山与长生
 heroFullScreen: true
 bgImage: https://theflyingraymond.oss-rg-china-mainland.aliyuncs.com/blog-image.png
 tagline: A prayer for the wild at the heart, kept in cages.
