@@ -7,17 +7,21 @@ tag:
   - 主线
 ---
 
-# 【主线】实现MyBatis：Chapter3: 解析SQL，浅尝参数匹配
+# 【主线】实现 MyBatis：Chapter3: 解析 SQL，浅尝参数匹配
 
-将参数与SQL动态结合，执行真实数据查询
+将参数与 SQL 动态结合，执行真实数据查询
 
 <!-- more -->
-::: tip 本章目标
+
+:::tip 本章目标
+
 - 支持通过接口调用 `Country selectById(@Param("id") Long id)`，映射到 `select * from country where id = #{id}` 语句的执行
-:::
+  :::
 
 ## 一、过程分析
+
 首先我们来分析一下，`select * from country where id = #{id}` 这个语句最终得到执行的流程是
+
 1. 我们通过某种方式获取到 `select * from country where id = ?`的 Prepared SQL 语句
 2. 我们通过某种方式得知 `Country selectById(@Param("id") Long id)`在调用时的入参 id 为 110
 3. 我们通过 `preparedStatement.setLong(1, 110)`的方式执行 JDBC 的调用
@@ -32,8 +36,11 @@ tag:
 **对于第四步**，我们暂时忽略实际的结果映射，我们本章只支持单个 `Country` 对象的查询。
 
 ## 二、核心设计
+
 ### 2.1 SQL 语句信息存储结构
-我们定义一个 SqlSource 的结构来记录之前第一步中提到的信息，其中 sql字段即对应 Prepared SQL 信息，parameterMappings 字段采用有序的 List 结构记录占位符的名称，使用本身的索引信息来表示 Prepared SQL 中占位符的索引信息
+
+我们定义一个 SqlSource 的结构来记录之前第一步中提到的信息，其中 sql 字段即对应 Prepared SQL 信息，parameterMappings 字段采用有序的 List 结构记录占位符的名称，使用本身的索引信息来表示 Prepared SQL 中占位符的索引信息
+
 ```java
 public class SimpleSqlSource {
     //select * from country where id = ?
@@ -44,10 +51,13 @@ public class SimpleSqlSource {
     private final Configuration configuration;
 }
 ```
+
 ### 2.2 Method 信息
+
 而关于 method 信息，我们将其分为两部分：
 一是和 SQL 相关的信息，我们将其定义为一个 SqlCommand 结构，其中包含一个 name 字段负责与静态解析的 MapperStatement 建立联系，另一 type 字段表示当前方法的增删改查类型，方便后续操作。
 二是用于参数解析的相关信息，我们将其定义为 MethodSignature 结构，但其中真正的解析逻辑我们借助 ParamNameResolver 来实现。
+
 ```java
 public class MapperMethod {
     // 记录了sql的名称和类型
@@ -67,8 +77,9 @@ public class MapperMethod {
     }
 }
 ```
+
 2.3 参数解析器
-我们在之前 SQL 信息的存储中已经记录了占位符索引与名称的映射，如果我们再有一个占位符名称到实参的映射，那我们其实就可以得到真实的可执行的 SQL。ParamNameResolver就是负责这块内容。
+我们在之前 SQL 信息的存储中已经记录了占位符索引与名称的映射，如果我们再有一个占位符名称到实参的映射，那我们其实就可以得到真实的可执行的 SQL。ParamNameResolver 就是负责这块内容。
 首先，它的核心功能是返回一个映射数据，入参是运行时的参数信息 Object[] args，而获取这个信息需要通过 Method 对象的信息获取到形参索引和形参名称的映射，这个逻辑我们放在构造器去执行，将处理结果放在 names 字段中。
 
 ```java
@@ -78,21 +89,25 @@ public class MapperMethod {
 public class ParamNameResolver {
     private final SortedMap<Integer, String> names;
 
-    public ParamNameResolver(Configuration config, Method method) {   
+    public ParamNameResolver(Configuration config, Method method) {
     }
 
     public Map<String, Object> resolveNamedParams(Object[] args) {
     }
 }
 ```
+
 ## 三、整体架构
+
 ![SQL解析与参数绑定](SQL解析与参数绑定.png)
 结合上图，我们将整体流程概括如下：
-1. 配置解析阶段，将 mapper 文件中的执行节点解析为两种数据：PreparedSQL 以及一份占位符 idx 与 name 的映射，信息存放在 MappedStatement中
-2. 运行阶段，根据执行方法构建一个 MappedMethod 对象，几个依赖类在此完成参数绑定的核心逻辑，该逻辑放在 ParamNameResolver实例中
+
+1. 配置解析阶段，将 mapper 文件中的执行节点解析为两种数据：PreparedSQL 以及一份占位符 idx 与 name 的映射，信息存放在 MappedStatement 中
+2. 运行阶段，根据执行方法构建一个 MappedMethod 对象，几个依赖类在此完成参数绑定的核心逻辑，该逻辑放在 ParamNameResolver 实例中
 3. Proxy 对方法调用通过层层交接来到 Executor，Executor 根据已知信息拼出最终的可执行 SQL，固定从数据库获取单个 Country 对象并返回。
 
 现在，我们的项目结构如下：
+
 ```shell
 .
 ├── pom.xml
@@ -157,8 +172,11 @@ public class ParamNameResolver {
             └── batis-config.xml
 
 ```
+
 ## 四、测试验证
+
 我们的数据库中 Country 表中目前有数据如下
+
 ```sql
 id, country_name, country_code
 1,United States,US
@@ -167,7 +185,9 @@ id, country_name, country_code
 2,Canada,CA
 4,Australia,AU
 ```
+
 我们通过如下测试验证
+
 ```java
 @Slf4j
 public class MainTest {
@@ -195,7 +215,9 @@ public class MainTest {
     }
 }
 ```
+
 结果符合预期！yes！
+
 ```shell
 20:51:43.561 [main] INFO  com.raymond.mybatis.builder.XMLConfigBuilder - 开始解析配置文件
 20:51:43.587 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...

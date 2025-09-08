@@ -7,8 +7,7 @@ tag:
   - 主线
 ---
 
-# 【主线】实现MyBatis：Chapter0: 介绍
-
+# 【主线】实现 MyBatis：Chapter0: 介绍
 
 <!-- more -->
 
@@ -16,6 +15,7 @@ MyBatis 是一个流行的 ORM 框架，广泛应用于 Java 项目中对数据�
 “造轮子”不是好的工作方式，但却是一个极好的学习方法，所有，这次我们就以造轮子的方式来进行对 MyBatis 的学习，目标是在保持架构基本一致的前提下实现其核心的增删改查及插件功能
 
 首先来看一段最简单的 MyBatis 使用的代码
+
 ```java
 public class Test {
     @org.junit.Test
@@ -31,16 +31,18 @@ public class Test {
     }
 }
 ```
+
 代码大致可以分为四个部分：
+
 1. 获取 session 工厂
 2. 通过 session 工厂获取 session 对象
 3. 通过 session 对象获取 mapper 代理
 4. 通过 mapper 代理执行接口方法
-上述四个步骤中，获取 session 对象这一步概念到实现上都相对简单，而其余的三步则分别对应了 MyBatis 核心的三块：配置解析、接口代理以及 逻辑执行
+   上述四个步骤中，获取 session 对象这一步概念到实现上都相对简单，而其余的三步则分别对应了 MyBatis 核心的三块：配置解析、接口代理以及 逻辑执行
 
 ![mybatis整体运行流程](mybatis整体运行.png)
 
-::: tip 
+:::tip
 MyBatis 的设计思路是在解析阶段将所有信息构成一个 Configuration 对象，把该对象作为 session 工厂的属性之一，同一工厂实例下生产是 session 都共享同一个配置对象。该配置对象层层传递，在解析、执行的各个阶段都发挥重要作用。
 :::
 接下来我们将一步步实现 MyBatis 的核心功能

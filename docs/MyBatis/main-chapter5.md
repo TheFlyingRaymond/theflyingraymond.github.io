@@ -7,31 +7,38 @@ tag:
   - 主线
 ---
 
-# 【主线】实现MyBatis：Chapter5: 功能完善，支持批量查询与增删改
+# 【主线】实现 MyBatis：Chapter5: 功能完善，支持批量查询与增删改
 
-以DO作为入参实现数据插入，并完成主键回填
+以 DO 作为入参实现数据插入，并完成主键回填
 
 <!-- more -->
-::: tip 本章目标
+
+:::tip 本章目标
+
 - 支持 `List<Country> selectByName(@Param("name") String name)`批量查询
-- 支持更新、删除语句 
+- 支持更新、删除语句
   - `int updateNameById(@Param("id") Long id, @Param("name") String name)`
   - `int deleteById(@Param("id") Long id);`
 - 支持 update 和 delete 操作
 - 支持插入语句 int insertCountry(Country country);，提供主键回填
-:::
+  :::
 
 ## 一、过程分析
+
 对于批量查询，jdbc 给我们返回的是结果集，此处增加一个 for 循环的逻辑并配合一些 api 的改动接口；对于删除和更新语句，本质和查询语句没有区别，并且更新行数 jdbc 也会给到我们；
 对于插入语句，起码有以下几点
+
 - 需要得到对象字段到数据库字段的映射
-- 需要获取到插入数据后得到的主键 
+- 需要获取到插入数据后得到的主键
 - 需要持有入参对象，并将主键 id 回填
-在我们之前的逻辑中，直接使用了 Map 来存储实参映射，如果入参是 DO 对象的话，通过反射也是可以实现类似的功能，此处需要一层抽象来屏蔽 Map 和 DO 对象根据形参获取实参的逻辑差异；插入数据后生成的主键，我们可以从 resultset 中获取到，并且因为我们持有了实参对象，也可将主键回填到对象中，此处我们可以默认主键固定为 id 字段
+  在我们之前的逻辑中，直接使用了 Map 来存储实参映射，如果入参是 DO 对象的话，通过反射也是可以实现类似的功能，此处需要一层抽象来屏蔽 Map 和 DO 对象根据形参获取实参的逻辑差异；插入数据后生成的主键，我们可以从 resultset 中获取到，并且因为我们持有了实参对象，也可将主键回填到对象中，此处我们可以默认主键固定为 id 字段
 
 ## 二、核心设计
+
 ### 2.1 抽象实参类
+
 我们的入参支持两种形式，一是直接以字段的形式入参，配合`param`注解实现参数绑定，二是以 DO 的方式传入对象，以对象字段名作为参数名进行实参绑定，我们将这两种方式抽象出`IRealParam`接口，提供参数的读取和写入，其中写入主要是为了`insert`后的参数回填。接口定义如下：
+
 ```java
 public interface IRealParam {
     Object getParam(String name);
@@ -39,7 +46,9 @@ public interface IRealParam {
     void setParam(String name, Object value);
 }
 ```
-我们之前参数绑定的逻辑中支持的就是第一种字段形式的入参，MapRealParam负责承载这部分逻辑
+
+我们之前参数绑定的逻辑中支持的就是第一种字段形式的入参，MapRealParam 负责承载这部分逻辑
+
 ```java
 public class MapRealParam implements IRealParam {
     private Map<String, Object> paramMap;
@@ -59,7 +68,9 @@ public class MapRealParam implements IRealParam {
     }
 }
 ```
-对于第二种方式的入参，我们使用 TypeRealParam来处理这部分逻辑，其核心逻辑就是通过反射来获取字段值或者给字段赋值。如果做进一步优化的话，这里可以维护部分额外的信息，以空间换取实现，对于同一类型的参数可省略多余的反射过程，但此处我们不会再做进一步的处理。
+
+对于第二种方式的入参，我们使用 TypeRealParam 来处理这部分逻辑，其核心逻辑就是通过反射来获取字段值或者给字段赋值。如果做进一步优化的话，这里可以维护部分额外的信息，以空间换取实现，对于同一类型的参数可省略多余的反射过程，但此处我们不会再做进一步的处理。
+
 ```java
 @Slf4j
 public class TypeRealParam implements IRealParam {
@@ -106,7 +117,9 @@ public class TypeRealParam implements IRealParam {
 ```
 
 ### 2.2 参数解析器
+
 我们之前参数绑定的逻辑中支持的就是第一种字段形式的入参，`MapRealParam`负责承载这部分逻辑
+
 ```java
 //引用参数名称解析器
 //提供方法形参的索引和参数名称的映射，如果有param修饰则使用其值。这个数据是为了配合sqlsource中的sql执行
@@ -114,7 +127,7 @@ public class TypeRealParam implements IRealParam {
 public class ParamNameResolver {
     private final SortedMap<Integer, String> names;
 
-    public ParamNameResolver(Configuration config, Method method) {   
+    public ParamNameResolver(Configuration config, Method method) {
     }
 
     public IRealParam resolveNamedParams(Object[] args) {
@@ -133,10 +146,11 @@ public class ParamNameResolver {
 ```
 
 ## 三、整体架构
+
 ![cp5](cp5.png)
 
 现在，我们的项目结构也来到这个样子
-::: details 项目结构
+
 ```shell
 ├── Executor
 │   ├── DefaultResultSetHandler.java
@@ -192,9 +206,13 @@ public class ParamNameResolver {
     ├── TypeHandler.java
     └── TypeHandlerRegistry.java
 ```
+
 :::
+
 ## 四、测试验证
+
 本章的重头戏是插入，我们写一个简单的测试
+
 ```java
 @Test
 public void test_insert() throws Exception {
@@ -208,7 +226,9 @@ public void test_insert() throws Exception {
     System.out.println(country);
 }
 ```
+
 结果不出所料：
+
 ```shell
 18:38:15.746 [main] INFO  com.raymond.mybatis.builder.XMLConfigBuilder - 开始解析配置文件
 18:38:15.763 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
@@ -218,6 +238,7 @@ public void test_insert() throws Exception {
 18:38:16.249 [main] INFO  com.raymond.mybatis.binding.TypeRealParam - getFieldValueByReflect success, obj:Country, name:countryCode, ret:test_insert_code
 Country(id=21, countryName=test_insert_name, countryCode=test_insert_code)
 ```
+
 至此，我们实现 MyBatis 主线系列完结撒花！新年快乐
 
 --结束于 2025-01-18

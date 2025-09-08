@@ -7,22 +7,27 @@ tag:
   - 主线
 ---
 
-# 【主线】实现MyBatis：Chapter4: 完善参数绑定，引入结果映射
+# 【主线】实现 MyBatis：Chapter4: 完善参数绑定，引入结果映射
 
-将参数与SQL动态结合，执行真实数据查询
+将参数与 SQL 动态结合，执行真实数据查询
 
 <!-- more -->
-::: tip 本章目标
+
+:::tip 本章目标
+
 - 支持 Country selectByIdAndName(@Param("id") String id, @Param("name") String name)的调用，且参数自行匹配，不需要 mock
 - 支持结果的自动映射，新建 People selectById(@Param("id") Long id)只需修改配置即可执行
-:::
+  :::
 
 ## 一、过程分析
+
 - 对于每个参数，我们已经在解析阶段就知道它对应的配置，而在运行时我们又拿到了实参，理论上只要把它和 sql 拼起来即可，但每种类型拼接到 sql 的方式可能不同，这里可能需要一个分支处理
 - 对于返回结果，我们在解析时可以知道 resultMap 对应相关信息，知道具体的类型，知道每个字段与数据库列的关系，理论上我们可以通过反射构造相关对象
 
 ## 二、核心设计
+
 参数绑定部分，我们直接以 Class 为 key 构建一个映射，value 是 TypeHandler，负责执行不同类型参数与 PreparedStatement 的整合，举例如下：
+
 ```java
 public interface TypeHandler<T> {
     void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
@@ -37,6 +42,7 @@ public class StringTypeHandler implements TypeHandler<String> {
 ```
 
 结果映射部分，一是信息存储的 ResultMapping 和 ResultMap 结构，二是信息使用的 DefaultResultSetHandler，其构造实际是在 mapper 文件解析时，逻辑是节点取值，稍微繁琐但并不复杂，不再赘述
+
 ```java
 public class ResultMap {
     // 全局配置信息
@@ -57,6 +63,7 @@ public class ResultMapping {
 ```
 
 而至于使用信息进行结果映射的部分，我们这里直接采用的最简单的方式，直接使用反射构造对象并给字段赋值（在 MyBatis 中则是创建了功能更为强大的工具类，封装的层次也更深）。
+
 ```java
 public interface ResultSetHandler {
     <E> List<E> handleResultSets(PreparedStatement stmt) throws SQLException;
@@ -99,11 +106,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
 }
 ```
+
 ## 三、整体架构
+
 ![cp3](cp3.png)
 
 现在，我们的项目结构也来到这个样子：
-::: details 项目结构
+
 ```shell
 .
 ├── pom.xml
@@ -182,10 +191,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             └── batis-config.xml
 
 ```
+
 :::
+
 ## 四、测试验证
+
 首先是我们多参数的自动绑定验证，结果不出意外
-::: details 自动绑定验证
+
 ```java
 @Test
 public void test_select_id_name() throws Exception {
@@ -208,11 +220,11 @@ null
 Country(id=2, countryName=Canada, countryCode=CA)
 */
 ```
+
 :::
 
-接下来是新构建类的测试，我们新建了 People类，新建了对应的 PeopleMapper接口和对应的 xml 文件，同时在配置文件中增加了对应的 mapper 扫描路径
+接下来是新构建类的测试，我们新建了 People 类，新建了对应的 PeopleMapper 接口和对应的 xml 文件，同时在配置文件中增加了对应的 mapper 扫描路径
 
-::: details 接口与类
 ```java
 @Data
 @NoArgsConstructor
@@ -226,9 +238,9 @@ public interface PeopleMapper {
     People selectById(@Param("id") Long id);
 }
 ```
+
 :::
 
-::: details mapper的xml配置
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
@@ -244,9 +256,8 @@ public interface PeopleMapper {
     </select>
 </mapper>
 ```
-:::
 
-::: details mybatis配置
+:::
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -275,10 +286,11 @@ public interface PeopleMapper {
     </mappers>
 </configuration>
 ```
+
 :::
 
 当然，结果也符合预期!
-::: details 测试结果
+
 ```shell
 22:48:12.201 [main] INFO  com.raymond.mybatis.builder.XMLConfigBuilder - 开始解析配置文件
 22:48:12.227 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
@@ -286,4 +298,5 @@ public interface PeopleMapper {
 22:48:12.747 [main] INFO  com.raymond.mybatis.proxy.MapperProxy - MapperProxy代理执行方法:selectById, 交由Executor执行
 People(id=1, name=Alice)
 ```
+
 :::
