@@ -35,29 +35,7 @@ const FeatureList: FeatureItem[] = [
     ),
     link: '/blog',
     color: '#2563eb',
-  },
-  {
-    title: 'Creative Projects',
-    icon: '🚀',
-    description: (
-      <>
-        Exploring creativity through various projects and experiments. Whether it's coding, writing, or other creative endeavors, sharing the process and outcomes of bringing ideas to life.
-      </>
-    ),
-    link: '/projects',
-    color: '#1d4ed8',
-  },
-  {
-    title: 'Connect & Share',
-    icon: '💬',
-    description: (
-      <>
-        Building meaningful connections through shared experiences and conversations. Let's learn from each other, grow together, and create a community of curious minds.
-      </>
-    ),
-    link: '/contact',
-    color: '#1e40af',
-  },
+  }
 ];
 
 function Feature({title, icon, description, link, color}: FeatureItem) {
@@ -83,11 +61,8 @@ export default function HomepageFeatures(): ReactNode {
       <div className="container">
         <div className={styles.featuresHeader}>
           <Heading as="h2" className={styles.featuresTitle}>
-            Explore My World
+          I'm getting tired of the pouring rain darling
           </Heading>
-          <p className={styles.featuresSubtitle}>
-            A space where learning, creativity, and life experiences come together. Discover stories, insights, and projects that reflect the journey of growth and discovery.
-          </p>
         </div>
         <div className="row">
           {FeatureList.map((props, idx) => (

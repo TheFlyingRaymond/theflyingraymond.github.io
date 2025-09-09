@@ -45,15 +45,19 @@ function HomepageHeader() {
             <div className={styles.floatingCard}>
               <div className={styles.cardContent}>
                 <div className={styles.avatar}>
-                  <div className={styles.avatarPlaceholder}>R</div>
+                  <img 
+                    src="https://avatars.githubusercontent.com/theflyingraymond" 
+                    alt="Ray's Avatar" 
+                    className={styles.avatarImage}
+                  />
                 </div>
                 <h3>Ray</h3>
-                <p>Lifelong Learner</p>
+                <p>A prayer for the wild at the heart, kept in cages.</p>
                 <div className={styles.skills}>
-                  <span className={styles.skillTag}>Learning</span>
-                  <span className={styles.skillTag}>Sharing</span>
-                  <span className={styles.skillTag}>Creating</span>
-                  <span className={styles.skillTag}>Growing</span>
+                  <span className={styles.skillTag}>Cycling</span>
+                  <span className={styles.skillTag}>Rock Climbing</span>
+                  <span className={styles.skillTag}>Marathon</span>
+                  <span className={styles.skillTag}>Coding</span>
                 </div>
               </div>
             </div>

@@ -6,7 +6,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 
 const config: Config = {
   title: "Ray's Personal Website",
-  tagline: "Sharing · Learning · Life",
+  tagline: "Sharing · Learning · Living",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -79,7 +79,7 @@ const config: Config = {
         },
         { to: "/blog", label: "Blog", position: "left" },
         {
-          href: "https://github.com/suncheng11",
+          href: "https://github.com/TheFlyingRaymond",
           label: "GitHub",
           position: "right",
         },
@@ -88,45 +88,45 @@ const config: Config = {
     footer: {
       style: "dark",
       links: [
-        {
-          title: "Documentation",
-          items: [
-            {
-              label: "Java Concurrency",
-              to: "/docs/Java多线程/java-concurrent-1",
-            },
-            {
-              label: "MyBatis",
-              to: "/docs/MyBatis/main-chapter0",
-            },
-          ],
-        },
-        {
-          title: "Social Media",
-          items: [
-            {
-              label: "GitHub",
-              href: "https://github.com/suncheng11",
-            },
-            {
-              label: "Blog",
-              to: "/blog",
-            },
-          ],
-        },
-        {
-          title: "More",
-          items: [
-            {
-              label: "About Me",
-              to: "/about",
-            },
-            {
-              label: "Contact",
-              to: "/contact",
-            },
-          ],
-        },
+        // {
+        //   title: "Documentation",
+        //   items: [
+        //     {
+        //       label: "Java Concurrency",
+        //       to: "/docs/Java多线程/java-concurrent-1",
+        //     },
+        //     {
+        //       label: "MyBatis",
+        //       to: "/docs/MyBatis/main-chapter0",
+        //     },
+        //   ],
+        // },
+        // {
+        //   title: "Social Media",
+        //   items: [
+        //     {
+        //       label: "GitHub",
+        //       href: "https://github.com/TheFlyingRaymond",
+        //     },
+        //     {
+        //       label: "Blog",
+        //       to: "/blog",
+        //     },
+        //   ],
+        // },
+        // {
+        //   title: "More",
+        //   items: [
+        //     {
+        //       label: "About Me",
+        //       to: "/about",
+        //     },
+        //     {
+        //       label: "Contact",
+        //       to: "/contact",
+        //     },
+        //   ],
+        // },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Ray's Personal Website. Built with Docusaurus.`,
     },
