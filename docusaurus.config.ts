@@ -71,8 +71,8 @@ const config: Config = {
         sidebarPath: "./reading-notes-sidebar.ts",
         // 移除编辑链接
         editUrl: undefined,
-        // 添加自定义CSS类名
-        docItemComponent: "@site/src/components/ReadingNotesDocItem",
+        // 使用默认的DocItem组件
+        docItemComponent: "@theme/DocItem",
       },
     ],
   ],
@@ -94,7 +94,7 @@ const config: Config = {
           label: "Documentation",
         },
         { to: "/blog", label: "Blog", position: "left" },
-        { to: "/reading-notes", label: "读书笔记", position: "left"},
+        { to: "/reading-notes", label: "Reading", position: "left"},
         {
           href: "https://github.com/TheFlyingRaymond",
           label: "GitHub",
