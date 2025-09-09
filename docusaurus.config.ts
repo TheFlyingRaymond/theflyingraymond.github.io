@@ -5,8 +5,8 @@ import type * as Preset from "@docusaurus/preset-classic";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: "Future Union",
-  tagline: "Dinosaurs are cool",
+  title: "Ray's Personal Website",
+  tagline: "Sharing · Learning · Life",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -27,14 +27,6 @@ const config: Config = {
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
-
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
-  i18n: {
-    defaultLocale: "en",
-    locales: ["en"],
-  },
 
   presets: [
     [
@@ -73,9 +65,9 @@ const config: Config = {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
     navbar: {
-      title: "My Site",
+      title: "Ray",
       logo: {
-        alt: "My Site Logo",
+        alt: "Ray's Personal Website",
         src: "img/logo.svg",
       },
       items: [
@@ -83,11 +75,11 @@ const config: Config = {
           type: "docSidebar",
           sidebarId: "tutorialSidebar",
           position: "left",
-          label: "Tutorial",
+          label: "Documentation",
         },
         { to: "/blog", label: "Blog", position: "left" },
         {
-          href: "https://github.com/facebook/docusaurus",
+          href: "https://github.com/suncheng11",
           label: "GitHub",
           position: "right",
         },
@@ -97,28 +89,28 @@ const config: Config = {
       style: "dark",
       links: [
         {
-          title: "Docs",
+          title: "Documentation",
           items: [
             {
-              label: "Tutorial",
-              to: "/docs/intro",
+              label: "Java Concurrency",
+              to: "/docs/Java多线程/java-concurrent-1",
+            },
+            {
+              label: "MyBatis",
+              to: "/docs/MyBatis/main-chapter0",
             },
           ],
         },
         {
-          title: "Community",
+          title: "Social Media",
           items: [
             {
-              label: "Stack Overflow",
-              href: "https://stackoverflow.com/questions/tagged/docusaurus",
+              label: "GitHub",
+              href: "https://github.com/suncheng11",
             },
             {
-              label: "Discord",
-              href: "https://discordapp.com/invite/docusaurus",
-            },
-            {
-              label: "X",
-              href: "https://x.com/docusaurus",
+              label: "Blog",
+              to: "/blog",
             },
           ],
         },
@@ -126,17 +118,17 @@ const config: Config = {
           title: "More",
           items: [
             {
-              label: "Blog",
-              to: "/blog",
+              label: "About Me",
+              to: "/about",
             },
             {
-              label: "GitHub",
-              href: "https://github.com/facebook/docusaurus",
+              label: "Contact",
+              to: "/contact",
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Ray's Personal Website. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

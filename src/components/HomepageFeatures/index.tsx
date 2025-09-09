@@ -1,57 +1,78 @@
 import type {ReactNode} from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
+import Link from '@docusaurus/Link';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import styles from './styles.module.css';
 
 type FeatureItem = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  icon: string;
   description: ReactNode;
+  link: string;
+  color: string;
 };
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'Knowledge Sharing',
+    icon: '📚',
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Sharing insights from my learning journey across various fields. From technology and programming to personal growth and creative pursuits, documenting the path of continuous learning.
       </>
     ),
+    link: '/docs/intro',
+    color: '#3b82f6',
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Life Stories',
+    icon: '✍️',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Personal reflections, experiences, and thoughts on life's journey. Every story is a piece of the puzzle that makes us who we are, shared with authenticity and heart.
       </>
     ),
+    link: '/blog',
+    color: '#2563eb',
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Creative Projects',
+    icon: '🚀',
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Exploring creativity through various projects and experiments. Whether it's coding, writing, or other creative endeavors, sharing the process and outcomes of bringing ideas to life.
       </>
     ),
+    link: '/projects',
+    color: '#1d4ed8',
+  },
+  {
+    title: 'Connect & Share',
+    icon: '💬',
+    description: (
+      <>
+        Building meaningful connections through shared experiences and conversations. Let's learn from each other, grow together, and create a community of curious minds.
+      </>
+    ),
+    link: '/contact',
+    color: '#1e40af',
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({title, icon, description, link, color}: FeatureItem) {
   return (
-    <div className={clsx('col col--4')}>
-      <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
-      </div>
-      <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
-      </div>
+    <div className={clsx('col col--6 col--offset-0')}>
+      <Link to={link} className={styles.featureCard}>
+        <div className={styles.featureIcon} style={{backgroundColor: color}}>
+          <span className={styles.iconEmoji}>{icon}</span>
+        </div>
+        <div className={styles.featureContent}>
+          <Heading as="h3" className={styles.featureTitle}>{title}</Heading>
+          <p className={styles.featureDescription}>{description}</p>
+        </div>
+        <div className={styles.featureArrow}>→</div>
+      </Link>
     </div>
   );
 }
@@ -60,6 +81,14 @@ export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
       <div className="container">
+        <div className={styles.featuresHeader}>
+          <Heading as="h2" className={styles.featuresTitle}>
+            Explore My World
+          </Heading>
+          <p className={styles.featuresSubtitle}>
+            A space where learning, creativity, and life experiences come together. Discover stories, insights, and projects that reflect the journey of growth and discovery.
+          </p>
+        </div>
         <div className="row">
           {FeatureList.map((props, idx) => (
             <Feature key={idx} {...props} />
