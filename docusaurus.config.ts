@@ -71,8 +71,11 @@ const config: Config = {
         sidebarPath: "./reading-notes-sidebar.ts",
         // 移除编辑链接
         editUrl: undefined,
-        // 使用默认的DocItem组件
+        // 使用默认的DocItem组件，启用内置目录功能
         docItemComponent: "@theme/DocItem",
+        // 启用目录功能
+        showLastUpdateTime: true,
+        showLastUpdateAuthor: true,
       },
     ],
   ],
@@ -150,6 +153,11 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
+    },
+    // 启用目录功能
+    tableOfContents: {
+      minHeadingLevel: 2,
+      maxHeadingLevel: 6,
     },
   } satisfies Preset.ThemeConfig,
 };
