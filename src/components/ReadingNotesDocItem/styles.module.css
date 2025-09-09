@@ -1,0 +1,44 @@
+.readingNotesContainer {
+  width: 100%;
+  max-width: 100%;
+}
+
+.contentWrapper {
+  display: flex;
+  gap: 1rem;
+  max-width: 100%;
+}
+
+.mainContent {
+  flex: 1;
+  min-width: 0; /* 防止内容溢出 */
+  max-width: calc(100% - 320px); /* 为右边栏预留空间 */
+}
+
+.sidebar {
+  flex: 0 0 300px;
+  position: relative;
+}
+
+/* 响应式设计 */
+@media (max-width: 996px) {
+  .contentWrapper {
+    flex-direction: column;
+  }
+  
+  .mainContent {
+    max-width: 100%;
+  }
+  
+  .sidebar {
+    flex: none;
+    order: -1; /* 在小屏幕上将目录放在内容前面 */
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .contentWrapper {
+    gap: 0.5rem;
+  }
+}
