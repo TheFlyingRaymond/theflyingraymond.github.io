@@ -71,6 +71,8 @@ const config: Config = {
         sidebarPath: "./reading-notes-sidebar.ts",
         // 移除编辑链接
         editUrl: undefined,
+        // 添加自定义CSS类名
+        docItemComponent: "@site/src/components/ReadingNotesDocItem",
       },
     ],
   ],
